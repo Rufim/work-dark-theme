@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Work Dark — Jira, Confluence, GitLab, Allure
 // @namespace    https://github.com/Rufim/work-dark-theme
-// @version      1.1.1
+// @version      1.1.2
 // @description  Единая тёмная тема для Jira, Confluence, GitLab и Allure TestOps: своя палитра и перекраска стилей страницы на лету
 // @author       Rufim
 // @homepageURL  https://github.com/Rufim/work-dark-theme
@@ -49,6 +49,8 @@
   // dark — всегда тёмная, auto — как в системе, off — выключена
   const MODES = { dark: 'всегда', auto: 'как в системе', off: 'выключена' };
   const mode = MODES[settings.get('mode', 'dark')] ? settings.get('mode', 'dark') : 'dark';
+  const VERSION = (typeof GM_info !== 'undefined' && GM_info.script) ? GM_info.script.version : 'unknown';
+  if (window.top === window) console.info('[work-dark] тёмная тема: v' + VERSION + ', режим: ' + mode);
   const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
 
   function setMode(next) {
