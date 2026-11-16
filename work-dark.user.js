@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Work Dark — Jira, Confluence, GitLab
+// @name         Work Dark — Jira, Confluence, GitLab, Allure
 // @namespace    https://github.com/Rufim/work-dark-theme
-// @version      1.0.0
-// @description  Единая тёмная тема для Jira, Confluence и GitLab: своя палитра и перекраска стилей страницы на лету
+// @version      1.1.0
+// @description  Единая тёмная тема для Jira, Confluence, GitLab и Allure TestOps: своя палитра и перекраска стилей страницы на лету
 // @author       Rufim
 // @homepageURL  https://github.com/Rufim/work-dark-theme
 // @supportURL   https://github.com/Rufim/work-dark-theme/issues
@@ -11,6 +11,7 @@
 // @match        https://jira.mts.ru/*
 // @match        https://confluence.mts.ru/*
 // @match        https://gitlab.services.mts.ru/*
+// @match        https://allure.services.mts.ru/*
 // @run-at       document-start
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -883,8 +884,25 @@ html:root {
   // У GitLab включена своя тёмная тема — не мешаем ей
   const nativeDark = (doc) => doc.documentElement && doc.documentElement.classList.contains('gl-dark');
 
+  // Allure TestOps: у него есть встроенная тёмная тема по data-theme="dark" на html —
+  // включаем её вместо перекраски (родная палитра точнее, а перекрашивать готовую тему не нужно)
+  const nativeThemeHosts = {
+    'allure.services.mts.ru': (doc) => doc.documentElement.setAttribute('data-theme', 'dark'),
+  };
+
+  function startNativeTheme(doc, forceDark) {
+    doc.documentElement.setAttribute('data-work-dark', '');
+    const sync = () => {
+      if (doc.documentElement.getAttribute('data-theme') !== 'dark') forceDark(doc);
+    };
+    sync();
+    new MutationObserver(sync).observe(doc.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  }
+
   function start(doc) {
     if (!doc.documentElement || doc.documentElement.hasAttribute('data-work-dark') || nativeDark(doc)) return;
+    const forceDark = nativeThemeHosts[location.hostname];
+    if (forceDark) { startNativeTheme(doc, forceDark); return; }
     new Engine(doc).run();
   }
 
