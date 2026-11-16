@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Work Dark — Jira, Confluence, GitLab, Allure
 // @namespace    https://github.com/Rufim/work-dark-theme
-// @version      1.1.0
+// @version      1.1.1
 // @description  Единая тёмная тема для Jira, Confluence, GitLab и Allure TestOps: своя палитра и перекраска стилей страницы на лету
 // @author       Rufim
 // @homepageURL  https://github.com/Rufim/work-dark-theme
@@ -866,7 +866,36 @@ html:root {
   --super-sidebar-nav-item-active-bg: var(--work-dark-accent-tint);
   --super-sidebar-nav-item-current-bg: var(--work-dark-accent-tint);
 }
+/* Сайдбар: GitLab определяет --super-sidebar-* на самом элементе .super-sidebar
+   и в его темах (.ui-blue .super-sidebar и т.п.), поэтому :root-переопределения
+   не действуют — перекрываем на скоупе элемента. !important, чтобы победить
+   и (0,3,0)-варианты вроде .ui-blue.gl-dark .super-sidebar независимо от порядка стилей */
+.super-sidebar,
+.super-sidebar-flyout {
+  --super-sidebar-bg: var(--work-dark-chrome) !important;
+  --super-sidebar-border-color: var(--work-dark-line) !important;
+  --super-sidebar-context-header-color: var(--work-dark-text) !important;
+  --super-sidebar-accent-color: var(--work-dark-link) !important;
+  --super-sidebar-user-bar-bg: var(--work-dark-raised) !important;
+  --super-sidebar-user-bar-button-bg: var(--work-dark-subtle) !important;
+  --super-sidebar-user-bar-button-color: var(--work-dark-text) !important;
+  --super-sidebar-user-bar-button-border-color: var(--work-dark-line) !important;
+  --super-sidebar-user-bar-button-hover-bg: var(--work-dark-hover) !important;
+  --super-sidebar-user-bar-button-hover-color: var(--work-dark-heading) !important;
+  --super-sidebar-user-bar-button-active-bg: var(--work-dark-pressed) !important;
+  --super-sidebar-nav-item-hover-bg: var(--work-dark-hover) !important;
+  --super-sidebar-nav-item-active-bg: var(--work-dark-pressed) !important;
+  --super-sidebar-nav-item-current-bg: var(--work-dark-accent-tint) !important;
+  --super-sidebar-hr-mix-blend-mode: screen !important;
+}
 .super-sidebar { border-right: 1px solid var(--work-dark-line); }
+/* Поле поиска сайдбара: его стиль может приходить ленивым бандлом мимо движка */
+.super-sidebar input.gl-form-input,
+.super-sidebar .gl-search-box-by-type input {
+  background-color: var(--work-dark-subtle) !important;
+  color: var(--work-dark-text) !important;
+  border-color: var(--work-dark-line) !important;
+}
 `;
 
   function injectTheme(doc) {
