@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Work Dark — Jira, Confluence, GitLab, Allure
 // @namespace    https://github.com/Rufim/work-dark-theme
-// @version      1.1.2
+// @version      1.1.3
 // @description  Единая тёмная тема для Jira, Confluence, GitLab и Allure TestOps: своя палитра и перекраска стилей страницы на лету
 // @author       Rufim
 // @homepageURL  https://github.com/Rufim/work-dark-theme
@@ -931,7 +931,12 @@ html:root {
   }
 
   function start(doc) {
-    if (!doc.documentElement || doc.documentElement.hasAttribute('data-work-dark') || nativeDark(doc)) return;
+    if (!doc.documentElement) return;
+    if (doc.documentElement.hasAttribute('data-work-dark')) {
+      if (window.top === window) console.warn('[work-dark] на странице уже сработала другая копия скрипта — удалите старую версию в Tampermonkey (панель управления), оставьте только одну');
+      return;
+    }
+    if (nativeDark(doc)) return;
     const forceDark = nativeThemeHosts[location.hostname];
     if (forceDark) { startNativeTheme(doc, forceDark); return; }
     new Engine(doc).run();
