@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Work Dark — Jira, Confluence, GitLab, Allure
 // @namespace    https://github.com/Rufim/work-dark-theme
-// @version      1.1.3
+// @version      1.1.4
 // @description  Единая тёмная тема для Jira, Confluence, GitLab и Allure TestOps: своя палитра и перекраска стилей страницы на лету
 // @author       Rufim
 // @homepageURL  https://github.com/Rufim/work-dark-theme
@@ -553,15 +553,30 @@
       else onReady();
       this.win.addEventListener('load', () => this.scanSheets(true), { once: true });
 
+      // Гонки SPA: бандл страницы может пересоздаваться при навигации, а его правила —
+      // приходить в момент перестановки DOM. Любая крупная перестановка — повод для
+      // повторного прогона; дебаунс, чтобы не ходить по всем правилам на каждую мутацию.
+      let rescanTimer = 0;
+      const scheduleRescan = () => {
+        if (rescanTimer) return;
+        rescanTimer = this.win.setTimeout(() => {
+          rescanTimer = 0;
+          this.scanSheets(true);
+        }, 350);
+      };
+
       new this.win.MutationObserver((mutations) => {
         let sheetsChanged = false;
+        let domChanged = false;
         for (const m of mutations) {
           if (m.type === 'attributes') {
             if (m.target !== doc.documentElement || m.attributeName !== 'data-work-dark') this.queueInline(m.target);
             continue;
           }
+          if (m.removedNodes.length) domChanged = true;
           for (const node of m.addedNodes) {
             if (node.nodeType !== 1) continue;
+            domChanged = true;
             const tag = node.tagName;
             if (tag === 'LINK' || tag === 'STYLE') {
               sheetsChanged = true;
@@ -576,6 +591,7 @@
           }
         }
         if (sheetsChanged) this.scanSheets(true);
+        else if (domChanged) scheduleRescan();
         if (!doc.getElementById('work-dark-theme')) injectTheme(doc);
       }).observe(doc, {
         childList: true,
